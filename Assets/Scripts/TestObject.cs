@@ -1,28 +1,43 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Socket.Newtonsoft.Json;
-using Socket.Quobject.SocketIoClientDotNet.Client;
+using SimpleJSON;
+using Quobject.SocketIoClientDotNet.Client;
 using UnityEngine;
+using Newtonsoft.Json;
 
-public class TestObject : MonoBehaviour {
-  private QSocket socket;
+public class TestObject : MonoBehaviour
+{
+	private Socket socket;
 
-    void Start()
-    {
-        socket = IO.Socket("http://hellfightsocket.run.goorm.io:80");
+	void Start()
+	{
+		socket = IO.Socket("http://hellfightsocket.run.goorm.io:80");
 
-        socket.On(QSocket.EVENT_CONNECT, () =>
-        {
-            Debug.Log("Connected");
-        });
+		socket.On(Socket.EVENT_CONNECT, () =>
+		{
+			Debug.Log("Connected");
+		});
 
-        Dictionary<string, string> dict = new Dictionary<string, string>();
-        dict.Add("text", "test");
-        Debug.Log(JsonConvert.SerializeObject(dict));
-    }
+		socket.On("SendClient", (data) =>
+		{
+			Debug.Log(JSON.Parse(data.ToString())["text"]);
+		});
+	}
 
-  private void OnDestroy () {
-    socket.Disconnect ();
-  }
+	private void FixedUpdate()
+	{
+		var send_data = new Dictionary<string, string>
+		{
+			{"text","test" }
+		};
+
+		socket.Emit("SendServer", JsonConvert.SerializeObject(send_data));
+		Debug.Log("Sended");
+	}
+
+	private void OnDestroy()
+	{
+		socket.Disconnect();
+	}
 }
