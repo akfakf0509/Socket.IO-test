@@ -1,18 +1,24 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using SimpleJSON;
 using Quobject.SocketIoClientDotNet.Client;
 using UnityEngine;
+using SimpleJSON;
 using Newtonsoft.Json;
+using UnityEngine.UI;
 
-public class TestObject : MonoBehaviour
+public class Register : MonoBehaviour
 {
 	private Socket socket;
 
+	public InputField id;
+	public InputField password;
+	public InputField email;
+	public InputField username;
+
 	void Start()
 	{
-		socket = IO.Socket("https://sunrinthonsocket.run.goorm.io:80");
+		socket = IO.Socket("https://sunrinthonsocket.run.goorm.io");
 
 		socket.On(Socket.EVENT_CONNECT, () =>
 		{
@@ -21,15 +27,18 @@ public class TestObject : MonoBehaviour
 
 		socket.On("SendClient", (data) =>
 		{
-			Debug.Log(JSON.Parse(data.ToString())["text"]);
+			Debug.Log(JSON.Parse(data.ToString()));
 		});
 	}
 
-	private void FixedUpdate()
+	public void TryRegister()
 	{
 		var send_data = new Dictionary<string, string>
 		{
-			{"text","test" }
+			{"id",id.text },
+			{"password",password.text },
+			{"email",email.text },
+			{"username",username.text }
 		};
 
 		socket.Emit("SendServer", JsonConvert.SerializeObject(send_data));
