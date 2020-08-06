@@ -22,7 +22,7 @@ public class Login : MonoBehaviour
 
 		if (Input.GetKeyDown(KeyCode.Return))
 		{
-			TryLogin();
+			TryLogin_Fun();
 		}
 	}
 

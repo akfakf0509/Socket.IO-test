@@ -6,47 +6,47 @@ using UnityEngine;
 using SimpleJSON;
 using Newtonsoft.Json;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class Register : MonoBehaviour
 {
-	private Socket socket;
-
 	public InputField id;
 	public InputField password;
 	public InputField email;
 	public InputField username;
 
-	void Start()
+	public void TryRegister_Fun()
 	{
-		socket = IO.Socket("https://sunrinthonsocket.run.goorm.io");
-
-		socket.On(Socket.EVENT_CONNECT, () =>
-		{
-			Debug.Log("Connected");
-		});
-
-		socket.On("SendClient", (data) =>
-		{
-			Debug.Log(JSON.Parse(data.ToString()));
-		});
+		StartCoroutine(TryRegister());
 	}
 
-	public void TryRegister()
+	IEnumerator TryRegister()
 	{
-		var send_data = new Dictionary<string, string>
+		string serverUrl = "https://unitaemin.run.goorm.io/sunrinthon/auth/signup/";
+
+		WWWForm form = new WWWForm();
+		form.AddField("id", id.text);
+		form.AddField("password", password.text);
+		form.AddField("email", email.text);
+		form.AddField("username", username.text);
+
+		id.text = "";
+		password.text = "";
+		email.text = "";
+		username.text = "";
+
+		using (UnityWebRequest www = UnityWebRequest.Post(serverUrl, form))
 		{
-			{"id",id.text },
-			{"password",password.text },
-			{"email",email.text },
-			{"username",username.text }
-		};
+			yield return www.SendWebRequest();
 
-		socket.Emit("SendServer", JsonConvert.SerializeObject(send_data));
-		Debug.Log("Sended");
-	}
-
-	private void OnDestroy()
-	{
-		socket.Disconnect();
+			if (www.isNetworkError || www.isHttpError)
+			{
+				Debug.Log(www.error);
+			}
+			else
+			{
+				Debug.Log(www.downloadHandler.text);
+			}
+		}
 	}
 }
