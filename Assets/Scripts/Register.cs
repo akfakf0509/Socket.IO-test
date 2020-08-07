@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using Quobject.SocketIoClientDotNet.Client;
 using UnityEngine;
 using SimpleJSON;
-using Newtonsoft.Json;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 
@@ -14,6 +12,7 @@ public class Register : MonoBehaviour
 	public InputField password;
 	public InputField email;
 	public InputField username;
+	public Text Message;
 
 	public void TryRegister_Fun()
 	{
@@ -30,22 +29,28 @@ public class Register : MonoBehaviour
 		form.AddField("email", email.text);
 		form.AddField("username", username.text);
 
-		id.text = "";
-		password.text = "";
-		email.text = "";
-		username.text = "";
-
 		using (UnityWebRequest www = UnityWebRequest.Post(serverUrl, form))
 		{
 			yield return www.SendWebRequest();
 
-			if (www.isNetworkError || www.isHttpError)
+			if (www.isNetworkError)
 			{
 				Debug.Log(www.error);
+			}
+			else if (www.isHttpError)
+			{
+				Debug.Log(www.downloadHandler.text);
+				Message.text = JSON.Parse(www.downloadHandler.text)["mes"];
 			}
 			else
 			{
 				Debug.Log(www.downloadHandler.text);
+				Message.text = JSON.Parse(www.downloadHandler.text)["mes"];
+
+				id.text = "";
+				password.text = "";
+				email.text = "";
+				username.text = "";
 			}
 		}
 	}
